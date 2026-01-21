@@ -66,14 +66,14 @@ const loadClassrooms = async () => {
       name: salon.nombre,
       floor: salon.piso,
       capacity: salon.capacidad,
-      status: salon.estado === 'disponible' ? 'available' : salon.estado === 'ocupado' ? 'occupied' : 'maintenance',
-      statusText: getStatusText(salon.estado),
-      statusColor: getStatusColor(salon.estado),
+      status: salon.status,
+      statusText: salon.statusText,
+      statusColor: salon.statusColor,
       image: salon.imagen_url,
       bloque: salon.bloque,
       tipo: salon.tipo,
-      features: getFeatures(salon),
-      schedule: generateSchedule()
+      features: salon.features,
+      schedule: salon.schedule
     }))
   } catch (err) {
     console.error('Error completo:', err)

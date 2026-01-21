@@ -228,9 +228,67 @@ class Command(BaseCommand):
                 codigo=salon_data['codigo'],
                 defaults=salon_data
             )
+            # Siempre recuperar el objeto salón referenciado
+            if not created: 
+                salon = Salon.objects.get(codigo=salon_data['codigo'])
+            salones_creados.append(salon)
             if created:
-                salones_creados.append(salon)
                 self.stdout.write(self.style.SUCCESS(f'✅ Salón {salon.nombre} creado'))
+
+        # Crear reservaciones de ejemplo para hoy
+        self.stdout.write('Creando reservas de prueba...')
+        today = date.today()
+        
+        # Reservas para el primer salón (ej: A-101)
+        if salones_creados:
+            s1 = salones_creados[0]
+            # Reserva 8-10 AM
+            Reserva.objects.get_or_create(
+                salon=s1,
+                fecha=today,
+                hora_inicio=datetime.strptime('08:00', '%H:%M').time(),
+                hora_fin=datetime.strptime('10:00', '%H:%M').time(),
+                defaults={
+                    'usuario': docente,
+                    'motivo': 'Clase de Programación',
+                    'descripcion': 'Intro a Python',
+                    'numero_asistentes': 20,
+                    'estado': 'confirmada'
+                }
+            )
+            # Reserva 2-4 PM (14:00 - 16:00)
+            Reserva.objects.get_or_create(
+                salon=s1,
+                fecha=today,
+                hora_inicio=datetime.strptime('14:00', '%H:%M').time(),
+                hora_fin=datetime.strptime('16:00', '%H:%M').time(),
+                defaults={
+                    'usuario': estudiante,
+                    'motivo': 'Grupo de estudio',
+                    'descripcion': 'Repaso parcial',
+                    'numero_asistentes': 5,
+                    'estado': 'confirmada'
+                }
+            )
+            self.stdout.write(self.style.SUCCESS(f'✅ Reservas creadas para {s1.nombre}'))
+            
+            # Reserva para el segundo salón
+            if len(salones_creados) > 1:
+                s2 = salones_creados[1]
+                Reserva.objects.get_or_create(
+                    salon=s2,
+                    fecha=today,
+                    hora_inicio=datetime.strptime('09:00', '%H:%M').time(),
+                    hora_fin=datetime.strptime('12:00', '%H:%M').time(),
+                    defaults={
+                        'usuario': admin,
+                        'motivo': 'Mantenimiento Preventivo',
+                        'descripcion': 'Revisión proyectores',
+                        'numero_asistentes': 2,
+                        'estado': 'confirmada'
+                    }
+                )
+                self.stdout.write(self.style.SUCCESS(f'✅ Reservas creadas para {s2.nombre}'))
         
         self.stdout.write(self.style.SUCCESS(f'\n✅ Base de datos poblada exitosamente!'))
         self.stdout.write(self.style.SUCCESS(f'📊 Total: {len(salones_creados)} salones creados'))

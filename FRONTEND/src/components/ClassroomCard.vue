@@ -104,7 +104,7 @@ const getStatusIcon = (status) => {
       <router-link 
         v-if="classroom.status === 'available'"
         :to="`/aula/${classroom.id}`"
-        class="w-full bg-white dark:bg-gray-800 border border-[#B90A0A] text-[#B90A0A] hover:bg-[#B90A0A] hover:text-white font-bold py-2.5 rounded-lg transition-all duration-300 flex justify-center items-center shadow-sm hover:shadow-md"
+        class="w-full bg-[#B90A0A] dark:bg-gray-800 border border-[#B90A0A] text-white font-bold py-2.5 rounded-lg transition-all duration-300 flex justify-center items-center shadow-sm hover:shadow-md"
       >
         Reservar Aula
       </router-link>
