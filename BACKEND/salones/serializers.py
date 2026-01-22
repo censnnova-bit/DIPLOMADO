@@ -74,11 +74,24 @@ class SalonListSerializer(serializers.ModelSerializer):
         # Importación dentro del método para evitar ciclos
         from reservas.models import Reserva
         
-        # IMPORTANTE: Usar la hora local, no UTC, para determinar el "hoy"
-        # Si son las 7PM en Colombia, en UTC ya es el día siguiente
-        local_now = timezone.localtime(timezone.now())
-        today = local_now.date()
+        # Intentar obtener la fecha del query param, si no existe usar hoy (local)
+        request = self.context.get('request')
+        # Usar .GET en lugar de .query_params para compatibilidad con requests de Django puro y DRF
+        fecha_param = request.GET.get('fecha') if request else None
         
+        if fecha_param:
+            try:
+                today = datetime.strptime(fecha_param, '%Y-%m-%d').date()
+            except ValueError:
+                local_now = timezone.localtime(timezone.now())
+                today = local_now.date()
+        else:
+            local_now = timezone.localtime(timezone.now())
+            today = local_now.date()
+        
+        # DEBUG: Imprimir para verificar qué fecha se está consultando realmente
+        # print(f"DEBUG: Salon {obj.codigo} - Consultando fecha: {today}")
+
         # Definir horario de operación para coincidir con el diseño del frontend (8 AM - 6 PM)
         start_hour = 8
         end_hour = 18

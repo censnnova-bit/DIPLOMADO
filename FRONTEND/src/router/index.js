@@ -32,7 +32,7 @@ const routes = [
   {
     path: '/reservas',
     name: 'MyReservations',
-    component: () => import('../views/ClassroomList.vue'),
+    component: () => import('../views/MyReservations.vue'),
     meta: { requiresAuth: true }
   },
   {

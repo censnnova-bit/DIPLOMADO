@@ -26,5 +26,5 @@ class SalonViewSet(viewsets.ModelViewSet):
     def disponibles(self, request):
         """Obtener solo salones disponibles"""
         salones = self.queryset.filter(estado='disponible')
-        serializer = SalonListSerializer(salones, many=True)
+        serializer = SalonListSerializer(salones, many=True, context={'request': request})
         return Response(serializer.data)

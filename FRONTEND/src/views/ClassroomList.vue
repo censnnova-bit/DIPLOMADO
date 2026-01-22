@@ -52,12 +52,19 @@ const loadClassrooms = async () => {
   try {
     loading.value = true
     error.value = null
-    
+
     const params = {}
     if (filters.value.tipo) params.tipo = filters.value.tipo
     if (filters.value.bloque) params.bloque = filters.value.bloque
     if (filters.value.estado) params.estado = filters.value.estado
-    
+
+    // Enviar fecha actual local para obtener el horario correcto
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, '0')
+    const day = String(today.getDate()).padStart(2, '0')
+    params.fecha = `${year}-${month}-${day}`
+
     const response = await api.getSalones(params)
     // El backend devuelve una respuesta paginada con 'results'
     const salones = response.data.results || response.data
@@ -142,7 +149,7 @@ const generateSchedule = () => {
   <div class="min-h-screen bg-white dark:bg-gray-900 flex flex-col">
     <Header />
     <AdminNotifications />
-    
+
     <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:pt-4 pb-12 w-full">
       <!-- Title -->
       <div class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
@@ -153,19 +160,18 @@ const generateSchedule = () => {
       </div>
 
       <!-- Filters -->
-      <section class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700 relative overflow-hidden">
+      <section
+        class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8 border border-gray-200 dark:border-gray-700 relative overflow-hidden">
         <div class="absolute top-0 left-0 w-1 h-full bg-[#B90A0A]"></div>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
           <!-- Tipo -->
           <div class="relative">
             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
               Tipo de Salón
             </label>
-            <select 
-              v-model="filters.tipo"
-              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
+            <select v-model="filters.tipo"
+              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
               <option v-for="tipo in tiposDisponibles" :key="tipo.value" :value="tipo.value">
                 {{ tipo.label }}
               </option>
@@ -177,10 +183,8 @@ const generateSchedule = () => {
             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
               Estado
             </label>
-            <select 
-              v-model="filters.estado"
-              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-            >
+            <select v-model="filters.estado"
+              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white">
               <option v-for="estado in estadosDisponibles" :key="estado.value" :value="estado.value">
                 {{ estado.label }}
               </option>
@@ -192,12 +196,8 @@ const generateSchedule = () => {
             <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
               Bloque
             </label>
-            <input 
-              v-model="filters.bloque"
-              type="text" 
-              placeholder="Ej: Bloque A"
-              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-            />
+            <input v-model="filters.bloque" type="text" placeholder="Ej: Bloque A"
+              class="block w-full pl-3 pr-3 py-2.5 text-base border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white" />
           </div>
         </div>
 
@@ -213,15 +213,19 @@ const generateSchedule = () => {
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-700 rounded-lg p-6 mb-6">
+      <div v-else-if="error"
+        class="bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-700 rounded-lg p-6 mb-6">
         <div class="flex items-start">
-          <svg class="w-6 h-6 text-red-700 dark:text-red-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+          <svg class="w-6 h-6 text-red-700 dark:text-red-400 mr-3 flex-shrink-0" fill="none" stroke="currentColor"
+            viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <div class="flex-1">
             <h3 class="text-red-800 dark:text-red-300 font-semibold mb-2">Error al cargar los salones</h3>
             <p class="text-red-700 dark:text-red-400 text-sm">{{ error }}</p>
-            <button @click="loadClassrooms" class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
+            <button @click="loadClassrooms"
+              class="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
               Reintentar
             </button>
           </div>
@@ -231,18 +235,15 @@ const generateSchedule = () => {
       <!-- Empty State -->
       <div v-else-if="classrooms.length === 0" class="text-center py-12">
         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
         </svg>
         <p class="mt-4 text-gray-600 dark:text-gray-400">No se encontraron salones</p>
       </div>
 
       <!-- Classrooms Grid -->
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ClassroomCard 
-          v-for="classroom in classrooms" 
-          :key="classroom.id" 
-          :classroom="classroom" 
-        />
+        <ClassroomCard v-for="classroom in classrooms" :key="classroom.id" :classroom="classroom" />
       </div>
     </main>
 

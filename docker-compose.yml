@@ -1,0 +1,26 @@
+services:
+  backend:
+    build: 
+      context: ./BACKEND
+    container_name: gecos_backend
+    ports:
+      - "8069:8000"
+    volumes:
+      - ./BACKEND:/app
+      # Evitar montar venv o __pycache__ si existen localmente
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-dev-key
+      - ALLOWED_HOSTS=*
+      # Si usaras una base de datos externa como Postgres, aquí irían las credenciales
+    command: python manage.py runserver 0.0.0.0:8000
+
+  frontend:
+    build:
+      context: ./FRONTEND
+    container_name: gecos_frontend
+    ports:
+      - "8070:80"
+    depends_on:
+      - backend
+    # No necesitamos volúmenes aquí para producción, el código ya se compiló en la imagen
