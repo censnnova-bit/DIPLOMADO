@@ -1,5 +1,7 @@
 import axios from 'axios'
 
+// Usamos la variable de entorno si existe, o '/api' por defecto para producción relativa,
+// o el localhost explícito para desarrollo local sin docker.
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8069/api'
 
 // Configurar axios para incluir el token en todas las peticiones
