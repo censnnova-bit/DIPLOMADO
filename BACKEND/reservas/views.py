@@ -4,8 +4,17 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
-from .models import Reserva
-from .serializers import ReservaSerializer, ReservaCreateSerializer
+from .models import Reserva, Asignatura
+from .serializers import ReservaSerializer, ReservaCreateSerializer, AsignaturaSerializer
+
+
+class AsignaturaViewSet(viewsets.ModelViewSet):
+    """ViewSet para gestionar asignaturas"""
+    queryset = Asignatura.objects.all()
+    serializer_class = AsignaturaSerializer
+    permission_classes = [AllowAny] # Permisos se deberían ajustar
+    search_fields = ['nombre', 'codigo']
+    filter_backends = [DjangoFilterBackend]
 
 
 class ReservaViewSet(viewsets.ModelViewSet):
@@ -47,9 +56,9 @@ class ReservaViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(reservas, many=True)
         return Response(serializer.data)
     
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post', 'delete'])
     def cancelar(self, request, pk=None):
-        """Cancelar una reserva"""
+        """Eliminar una reserva permanentemente"""
         reserva = self.get_object()
         
         # Solo el usuario que creó la reserva puede cancelarla
@@ -59,11 +68,9 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_403_FORBIDDEN
             )
         
-        reserva.estado = 'cancelada'
-        reserva.save()
+        reserva.delete()
         
-        serializer = self.get_serializer(reserva)
-        return Response(serializer.data)
+        return Response(status=status.HTTP_204_NO_CONTENT)
     
     @action(detail=True, methods=['post'])
     def confirmar(self, request, pk=None):

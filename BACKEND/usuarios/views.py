@@ -35,8 +35,19 @@ def login_view(request):
     username = serializer.validated_data['username']
     password = serializer.validated_data['password']
     
+    print(f"DEBUG LOGIN: Intentando login con user='{username}' pass='{password}'")
+    
     user = authenticate(username=username, password=password)
     
+    if not user:
+        # Debugging extra
+        try:
+            u = Usuario.objects.get(username=username)
+            print(f"DEBUG LOGIN: Usuario encontrado. pass_valid={u.check_password(password)}")
+            print(f"DEBUG LOGIN: is_active={u.is_active}")
+        except Usuario.DoesNotExist:
+            print(f"DEBUG LOGIN: Usuario '{username}' NO encontrado en DB.")
+            
     if user:
         token, created = Token.objects.get_or_create(user=user)
         return Response({

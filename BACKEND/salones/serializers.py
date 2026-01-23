@@ -22,7 +22,7 @@ class SalonListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Salon
         fields = ['id', 'nombre', 'codigo', 'tipo', 'bloque', 'piso', 'capacidad', 
-                  'tiene_proyector', 'tiene_aire_acondicionado', 'estado', 'imagen_url',
+                  'tiene_proyector', 'tiene_aire_acondicionado', 'estado', 'imagen_url', 'imagen',
                   'status', 'statusText', 'statusColor', 'features', 'schedule']
 
     def get_status(self, obj):
@@ -92,9 +92,9 @@ class SalonListSerializer(serializers.ModelSerializer):
         # DEBUG: Imprimir para verificar qué fecha se está consultando realmente
         # print(f"DEBUG: Salon {obj.codigo} - Consultando fecha: {today}")
 
-        # Definir horario de operación para coincidir con el diseño del frontend (8 AM - 6 PM)
-        start_hour = 8
-        end_hour = 18
+        # Definir horario de operación extendido (6 AM - 10 PM)
+        start_hour = 6
+        end_hour = 22
         slots = []
         
         # Filtrar reservas confirmadas para este salón y esta fecha

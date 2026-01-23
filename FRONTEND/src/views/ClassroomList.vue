@@ -76,7 +76,7 @@ const loadClassrooms = async () => {
       status: salon.status,
       statusText: salon.statusText,
       statusColor: salon.statusColor,
-      image: salon.imagen_url,
+      image: salon.imagen || salon.imagen_url,
       bloque: salon.bloque,
       tipo: salon.tipo,
       features: salon.features,

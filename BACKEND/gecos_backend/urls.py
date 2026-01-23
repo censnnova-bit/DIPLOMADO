@@ -20,13 +20,14 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from salones.views import SalonViewSet
-from reservas.views import ReservaViewSet
+from reservas.views import ReservaViewSet, AsignaturaViewSet
 from usuarios.views import UsuarioViewSet, login_view, logout_view
 
 # Router centralizado
 router = DefaultRouter()
 router.register(r'salones', SalonViewSet, basename='salon')
 router.register(r'reservas', ReservaViewSet, basename='reserva')
+router.register(r'asignaturas', AsignaturaViewSet, basename='asignatura')
 router.register(r'usuarios', UsuarioViewSet, basename='usuario')
 
 urlpatterns = [

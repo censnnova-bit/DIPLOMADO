@@ -3,6 +3,33 @@ from django.conf import settings
 from salones.models import Salon
 
 
+class Asignatura(models.Model):
+    """Modelo de asignatura"""
+    nombre = models.CharField(max_length=100, unique=True)
+    codigo = models.CharField(max_length=20, blank=True, null=True)
+    semestre = models.CharField(max_length=20, blank=True, null=True)
+    
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name = 'Asignatura'
+        verbose_name_plural = 'Asignaturas'
+        ordering = ['nombre']
+    
+    def __str__(self):
+        return self.nombre
+
+    def save(self, *args, **kwargs):
+        if not self.codigo:
+            import random
+            import string
+            # Generar codigo: 3 primeras letras nombre + 4 digitos
+            prefix = self.nombre[:3].upper() if self.nombre else 'ASG'
+            suffix = ''.join(random.choices(string.digits, k=4))
+            self.codigo = f"{prefix}-{suffix}"
+        super().save(*args, **kwargs)
+
+
 class Reserva(models.Model):
     """Modelo de reserva de salón"""
     ESTADOS = (

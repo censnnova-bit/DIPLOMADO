@@ -2,10 +2,12 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useNotificationStore } from '../stores/notification'
 import Header from '../components/Header.vue'
 import api from '../services/api'
 
 const authStore = useAuthStore()
+const notification = useNotificationStore()
 const router = useRouter()
 
 // Verificar que sea admin
@@ -67,7 +69,7 @@ const loadReservas = async (page = 1) => {
     }
   } catch (err) {
     console.error('Error cargando reservas:', err)
-    alert('Error al cargar las reservas')
+    notification.error('Error al cargar las reservas')
   } finally {
     loading.value = false
   }
@@ -118,24 +120,26 @@ const cambiarEstado = async (reservaId, nuevoEstado) => {
 
   try {
     await api.updateReserva(reservaId, { estado: nuevoEstado })
-    alert('Estado actualizado exitosamente')
+    notification.success('Estado actualizado exitosamente')
     loadReservas()
   } catch (err) {
     console.error('Error actualizando estado:', err)
-    alert('Error al actualizar el estado')
+    notification.error('Error al actualizar el estado')
   }
 }
 
 const eliminarReserva = async (reservaId, motivo) => {
-  if (!confirm(`¿Está seguro de eliminar la reserva "${motivo}"?`)) return
+  if (!confirm(`¿Está seguro de eliminar PERMANENTEMENTE la reserva "${motivo}"?`)) return
 
   try {
     await api.cancelarReserva(reservaId)
-    alert('Reserva eliminada exitosamente')
-    loadReservas()
+    // Forzar recarga completa
+    await loadReservas()
+    // Notificar éxito
+    notification.success('Reserva eliminada exitosamente del sistema')
   } catch (err) {
     console.error('Error eliminando reserva:', err)
-    alert('Error al eliminar la reserva')
+    notification.error('Error al eliminar la reserva')
   }
 }
 

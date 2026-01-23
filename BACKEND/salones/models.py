@@ -34,6 +34,7 @@ class Salon(models.Model):
     
     estado = models.CharField(max_length=20, choices=ESTADOS, default='disponible')
     imagen_url = models.URLField(blank=True, null=True)
+    imagen = models.ImageField(upload_to='salones/', blank=True, null=True)
     
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)

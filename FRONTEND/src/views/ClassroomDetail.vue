@@ -2,10 +2,12 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Header from '../components/Header.vue'
+import { useNotificationStore } from '../stores/notification'
 import api from '../services/api'
 
 const route = useRoute()
 const router = useRouter()
+const notification = useNotificationStore()
 const classroomId = route.params.id
 
 const classroom = ref(null)
@@ -65,7 +67,7 @@ const schedule = ref([])
 
 const generateTimeSlots = () => {
   timeSlots.value = []
-  for (let hour = 7; hour <= 18; hour++) {
+  for (let hour = 6; hour <= 22; hour++) {
     timeSlots.value.push(`${hour.toString().padStart(2, '0')}:00`)
   }
 }
@@ -102,6 +104,7 @@ const reservaForm = ref({
   notas: ''
 })
 const submitting = ref(false)
+const asignaturas = ref([])
 
 onMounted(async () => {
   await loadClassroom()
@@ -109,7 +112,17 @@ onMounted(async () => {
   generateTimeSlots()
   initializeSchedule()
   await loadReservas()
+  await loadAsignaturas()
 })
+
+const loadAsignaturas = async () => {
+  try {
+    const response = await api.getAsignaturas()
+    asignaturas.value = response.data.results || response.data
+  } catch (err) {
+    console.error('Error cargando asignaturas:', err)
+  }
+}
 
 const loadClassroom = async () => {
   try {
@@ -124,7 +137,7 @@ const loadClassroom = async () => {
       description: response.data.descripcion || 'Salón académico',
       capacity: response.data.capacidad,
       status: response.data.estado,
-      image: response.data.imagen_url,
+      image: response.data.imagen || response.data.imagen_url,
       equipment: buildEquipment(response.data)
     }
   } catch (err) {
@@ -170,7 +183,8 @@ const loadReservas = async () => {
 
 const updateScheduleWithReservas = () => {
   reservas.value.forEach(reserva => {
-    if (reserva.estado === 'cancelada') return
+    // Filtrar reservas canceladas (case insensitive)
+    if (reserva.estado && reserva.estado.toLowerCase() === 'cancelada') return
 
     const dayIndex = weekDays.value.findIndex(d => d.fullDate === reserva.fecha)
     if (dayIndex === -1) return
@@ -191,40 +205,169 @@ const updateScheduleWithReservas = () => {
   })
 }
 
-const handleSlotClick = (timeIndex, dayIndex, slot) => {
-  if (slot.status === 'free') {
-    // Limpiar selección anterior
-    schedule.value.forEach(row => {
-      row.forEach(cell => {
-        if (cell.status === 'selected') {
-          cell.status = 'free'
-          cell.label = ''
-          cell.time = ''
-        }
-      })
+const clearSelection = () => {
+  schedule.value.forEach((row, rIdx) => {
+    row.forEach((cell, cIdx) => {
+      if (cell.status === 'selected') {
+        schedule.value[rIdx][cIdx] = { status: 'free', label: '', time: '' }
+      }
     })
+  })
+  selectedSlot.value = null
+}
 
-    // Marcar nueva selección
-    schedule.value[timeIndex][dayIndex] = {
+const updateSelectedSlotObject = (startRow, endRow, col) => {
+  // Asumimos timeSlots formato "HH:00"
+  const startTimeStr = timeSlots.value[startRow]
+  // Calcular fin
+  let endTimeStr = '19:00'
+  if (endRow + 1 < timeSlots.value.length) {
+    endTimeStr = timeSlots.value[endRow + 1]
+  } else {
+    // Si es el último slot, sumar una hora
+    const lastTime = parseInt(timeSlots.value[endRow].split(':')[0])
+    endTimeStr = `${(lastTime + 1).toString().padStart(2, '0')}:00`
+  }
+
+  selectedSlot.value = {
+    timeIndex: startRow,
+    dayIndex: col,
+    time: startTimeStr,
+    endTime: endTimeStr,
+    day: weekDays.value[col],
+    fecha: weekDays.value[col].fullDate
+  }
+
+  // Actualizar visualmente todos los slots seleccionados
+  for (let r = startRow; r <= endRow; r++) {
+    schedule.value[r][col] = {
       status: 'selected',
       label: 'Seleccionado',
-      time: `${timeSlots.value[timeIndex]} - ${timeSlots.value[timeIndex + 1] || '19:00'}`
+      time: `${startTimeStr} - ${endTimeStr}`
+    }
+  }
+}
+
+const updateSelectionVisuals = (startRow, endRow, col) => {
+  // Limpiar solo la columna actual (o reiniciar toda la tabla si queremos ser estrictos con 1 selección)
+  schedule.value.forEach((row, idx) => {
+    // Como solo permitimos selección en un día a la vez
+    if (row[col].status === 'selected') {
+      row[col] = { status: 'free', label: '', time: '' }
+    }
+  })
+
+  updateSelectedSlotObject(startRow, endRow, col)
+}
+
+const removeSlot = (timeIndex, dayIndex) => {
+  // Obtenemos los índices seleccionados actuales para ese día
+  let selectedIndices = []
+  schedule.value.forEach((row, rIdx) => {
+    if (row[dayIndex] && row[dayIndex].status === 'selected') {
+      selectedIndices.push(rIdx)
+    }
+  })
+
+  // Si no hay selección o solo hay uno, limpiar todo
+  if (selectedIndices.length <= 1) {
+    clearSelection()
+    return
+  }
+
+  const minRow = Math.min(...selectedIndices)
+  const maxRow = Math.max(...selectedIndices)
+
+  const isFirst = timeIndex === minRow
+  const isLast = timeIndex === maxRow
+
+  if (isFirst) {
+    // Quitar el primero, mantener el resto
+    updateSelectionVisuals(minRow + 1, maxRow, dayIndex)
+  } else if (isLast) {
+    // Quitar el último
+    updateSelectionVisuals(minRow, maxRow - 1, dayIndex)
+  } else {
+    // Es del medio. Usuario quiere quitar una del medio.
+    notification.warning("Para mantener la reserva continua, por favor elimina horas desde el inicio o el final de la selección.")
+  }
+}
+
+const handleSlotClick = (timeIndex, dayIndex, slot) => {
+  // Si clic en seleccionado, manejar eliminación (opcional, si queremos que clic en celda también elimine)
+  // Pero el usuario pidió botón eliminar específico. Dejemos que el slot seleccionado
+  // solo actúe si se hace clic en una celda LIBRE para extender/mover.
+  // Sin embargo, para consistencia, si hace clic en "selected", no haremos nada aquí,
+  // delegando la acción al botón 'X'.
+  if (slot.status !== 'free' && slot.status !== 'selected') return
+  if (slot.status === 'selected') return // Acción manejada por botón X
+
+  // 1. Encontrar selección actual en este día
+  let currentSelection = []
+  schedule.value.forEach((row, rIdx) => {
+    if (row[dayIndex] && row[dayIndex].status === 'selected') {
+      currentSelection.push(rIdx)
+    }
+  })
+
+  // Verificar si hay selección en OTROS días y borrarla
+  let otherDaySelection = false
+  schedule.value.forEach((row, rIdx) => {
+    row.forEach((cell, cIdx) => {
+      if (cell.status === 'selected' && cIdx !== dayIndex) {
+        otherDaySelection = true
+      }
+    })
+  })
+
+  if (otherDaySelection) {
+    clearSelection()
+    currentSelection = []
+  }
+
+  // 2. Lógica de selección
+  if (currentSelection.length === 0) {
+    // Nueva selección
+    updateSelectedSlotObject(timeIndex, timeIndex, dayIndex)
+  } else {
+    // Extender o reiniciar selección en el mismo día
+    const minRow = Math.min(...currentSelection)
+    const maxRow = Math.max(...currentSelection)
+
+    const newMin = Math.min(minRow, timeIndex)
+    const newMax = Math.max(maxRow, timeIndex)
+
+    // Verificar disponibilidad en el nuevo rango
+    let isRangeFree = true
+    for (let r = newMin; r <= newMax; r++) {
+      const cell = schedule.value[r][dayIndex]
+      if (cell.status !== 'free' && cell.status !== 'selected') {
+        isRangeFree = false
+        break
+      }
     }
 
-    selectedSlot.value = {
-      timeIndex,
-      dayIndex,
-      time: timeSlots.value[timeIndex],
-      endTime: timeSlots.value[timeIndex + 1] || '19:00',
-      day: weekDays.value[dayIndex],
-      fecha: weekDays.value[dayIndex].fullDate
+    if (isRangeFree) {
+      // Limpiar para refrescar
+      schedule.value.forEach((row, rIdx) => {
+        if (row[dayIndex].status === 'selected') {
+          row[dayIndex] = { status: 'free', label: '', time: '' }
+        }
+      })
+      updateSelectedSlotObject(newMin, newMax, dayIndex)
+    } else {
+      // Alertar sobre espacio
+      notification.warning("No se pueden agendar reservas con espacios ocupados entre medias. Se iniciará una nueva selección.")
+      // No continuo, reiniciar
+      clearSelection()
+      updateSelectedSlotObject(timeIndex, timeIndex, dayIndex)
     }
   }
 }
 
 const confirmReservation = () => {
   if (!selectedSlot.value) {
-    alert('Por favor, seleccione un horario primero')
+    notification.warning('Por favor, seleccione un horario primero')
     return
   }
   showModal.value = true
@@ -232,7 +375,7 @@ const confirmReservation = () => {
 
 const submitReservation = async () => {
   if (!reservaForm.value.asignatura) {
-    alert('Por favor, ingrese la asignatura')
+    notification.warning('Por favor, ingrese la asignatura')
     return
   }
 
@@ -258,27 +401,27 @@ const submitReservation = async () => {
     initializeSchedule()
     updateScheduleWithReservas()
 
-    alert('¡Reserva creada exitosamente!')
+    notification.success('¡Reserva creada exitosamente!')
   } catch (err) {
     console.error('Error creando reserva:', err)
-    alert(err.response?.data?.error || err.response?.data?.detail || 'Error al crear la reserva')
+    notification.error(err.response?.data?.error || err.response?.data?.detail || 'Error al crear la reserva')
   } finally {
     submitting.value = false
   }
 }
 
 const cancelarReserva = async (reservaId) => {
-  if (!confirm('¿Está seguro de que desea cancelar esta reserva?')) return
+  if (!confirm('¿Está seguro de que desea eliminar esta reserva permanentemente?')) return
 
   try {
     await api.cancelarReserva(reservaId)
     await loadReservas()
     initializeSchedule()
     updateScheduleWithReservas()
-    alert('Reserva cancelada exitosamente')
+    notification.success('Reserva eliminada exitosamente')
   } catch (err) {
-    console.error('Error cancelando reserva:', err)
-    alert('Error al cancelar la reserva')
+    console.error('Error eliminando reserva:', err)
+    notification.error('Error al eliminar la reserva')
   }
 }
 
@@ -410,13 +553,6 @@ const navigateWeek = (direction) => {
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <div>
-                <h4 class="text-sm font-bold text-blue-800 dark:text-blue-300">Política de Reservas</h4>
-                <p class="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                  Las reservas deben realizarse con al menos 24 horas de antelación. Máximo 4 horas continuas por
-                  sesión.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -506,8 +642,7 @@ const navigateWeek = (direction) => {
                       <!-- Selected/Reserved by user -->
                       <div v-else-if="slot.status === 'selected'"
                         class="bg-[#B90A0A] text-white border border-[#B90A0A] rounded p-2 flex flex-col justify-center shadow-lg transform scale-105 z-10 cursor-pointer relative group">
-                        <button
-                          @click="() => { schedule[timeIndex][dayIndex] = { status: 'free' }; selectedSlot = null }"
+                        <button @click.stop="removeSlot(timeIndex, dayIndex)"
                           class="absolute -top-2 -right-2 bg-white text-[#B90A0A] rounded-full w-5 h-5 flex items-center justify-center shadow cursor-pointer hover:bg-gray-100">
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -603,9 +738,13 @@ const navigateWeek = (direction) => {
                   <form @submit.prevent="submitReservation" class="space-y-4">
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Asignatura *</label>
-                      <input v-model="reservaForm.asignatura" type="text" required
-                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-md"
-                        placeholder="Ej: Ingeniería de Software II" />
+                      <select v-model="reservaForm.asignatura" required
+                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-[#B90A0A] focus:border-[#B90A0A] sm:text-sm rounded-md">
+                        <option value="" disabled>Seleccione una asignatura</option>
+                        <option v-for="asignatura in asignaturas" :key="asignatura.id" :value="asignatura.nombre">
+                          {{ asignatura.nombre }} <span v-if="asignatura.codigo">({{ asignatura.codigo }})</span>
+                        </option>
+                      </select>
                     </div>
                     <div>
                       <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Notas

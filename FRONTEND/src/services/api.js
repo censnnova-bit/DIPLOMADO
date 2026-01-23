@@ -1,14 +1,14 @@
 import axios from 'axios'
 
 // Usamos la variable de entorno si existe, o '/api' por defecto para producción relativa,
-// o el localhost explícito para desarrollo local sin docker.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8069/api'
+// o el localhost explícito (puerto 8000) para desarrollo local sin docker.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
-// Configurar axios para incluir el token en todas las peticiones
+// Configurar axios para incluir el token en todas las peticiones EXCEPT en login
 axios.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
-    if (token) {
+    if (token && !config.url.includes('/login/')) {
       config.headers.Authorization = `Token ${token}`
     }
     return config
@@ -42,7 +42,7 @@ export default {
   },
 
   updateSalon(id, data) {
-    return axios.put(`${API_URL}/salones/${id}/`, data)
+    return axios.patch(`${API_URL}/salones/${id}/`, data)
   },
 
   deleteSalon(id) {
@@ -65,7 +65,12 @@ export default {
   },
 
   getReservasPorSalon(salonId) {
-    return axios.get(`${API_URL}/reservas/`, { params: { salon: salonId } })
+    return axios.get(`${API_URL}/reservas/`, { 
+      params: { 
+        salon: salonId,
+        timestamp: new Date().getTime() // Cache buster
+      } 
+    })
   },
 
   createReserva(data) {
@@ -78,6 +83,23 @@ export default {
 
   updateReserva(id, data) {
     return axios.patch(`${API_URL}/reservas/${id}/`, data)
+  },
+
+  // Asignaturas
+  getAsignaturas() {
+    return axios.get(`${API_URL}/asignaturas/`)
+  },
+  
+  createAsignatura(data) {
+    return axios.post(`${API_URL}/asignaturas/`, data)
+  },
+  
+  updateAsignatura(id, data) {
+    return axios.put(`${API_URL}/asignaturas/${id}/`, data)
+  },
+  
+  deleteAsignatura(id) {
+    return axios.delete(`${API_URL}/asignaturas/${id}/`)
   },
 
   confirmarReserva(id) {

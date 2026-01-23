@@ -1,8 +1,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import Header from '../components/Header.vue'
+import { useNotificationStore } from '../stores/notification'
 import api from '../services/api'
 
+const notification = useNotificationStore()
 const reservas = ref([])
 const loading = ref(true)
 
@@ -25,10 +27,10 @@ const cancelarReserva = async (reservaId) => {
         // Recargar
         const response = await api.getMisReservas()
         reservas.value = response.data
-        alert('Reserva cancelada exitosamente')
+        notification.success('Reserva cancelada exitosamente')
     } catch (err) {
         console.error('Error cancelando reserva:', err)
-        alert(err.response?.data?.error || 'Error al cancelar la reserva')
+        notification.error(err.response?.data?.error || 'Error al cancelar la reserva')
     }
 }
 

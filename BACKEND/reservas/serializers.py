@@ -1,7 +1,15 @@
 from rest_framework import serializers
-from .models import Reserva
+from .models import Reserva, Asignatura
 from salones.serializers import SalonListSerializer
 from usuarios.serializers import UsuarioSerializer
+
+
+class AsignaturaSerializer(serializers.ModelSerializer):
+    """Serializer para el modelo Asignatura"""
+    class Meta:
+        model = Asignatura
+        fields = '__all__'
+        read_only_fields = ['codigo']
 
 
 class ReservaSerializer(serializers.ModelSerializer):
