@@ -18,6 +18,8 @@ services:
   frontend:
     build:
       context: ./FRONTEND
+      args:
+        - VITE_API_URL=http://185.202.223.66:8069/api
     container_name: gecos_frontend
     ports:
       - "8070:80"

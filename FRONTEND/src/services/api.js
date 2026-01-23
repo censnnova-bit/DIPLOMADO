@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_URL = 'http://localhost:8069/api'
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8069/api'
 
 // Configurar axios para incluir el token en todas las peticiones
 axios.interceptors.request.use(
