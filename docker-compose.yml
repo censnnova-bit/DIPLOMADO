@@ -13,7 +13,7 @@ services:
       - SECRET_KEY=django-insecure-docker-dev-key
       - ALLOWED_HOSTS=*
       # Si usaras una base de datos externa como Postgres, aquí irían las credenciales
-    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: sh -c "python manage.py migrate && python poblar_datos.py && python manage.py runserver 0.0.0.0:8000"
 
   frontend:
     build:
