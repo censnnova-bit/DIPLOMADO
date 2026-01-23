@@ -7,13 +7,14 @@ services:
       - "8069:8000"
     volumes:
       - ./BACKEND:/app
-      # Evitar montar venv o __pycache__ si existen localmente
+      - gecos_media:/app/media  # Persistir archivos media
     environment:
-      - DEBUG=True
-      - SECRET_KEY=django-insecure-docker-dev-key
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-docker-dev-key}
       - ALLOWED_HOSTS=*
-      # Si usaras una base de datos externa como Postgres, aquí irían las credenciales
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS:-}
     command: sh -c "python manage.py migrate && python poblar_datos.py && python manage.py runserver 0.0.0.0:8000"
+    restart: unless-stopped
 
   frontend:
     build:
@@ -25,4 +26,7 @@ services:
       - "8070:80"
     depends_on:
       - backend
-    # No necesitamos volúmenes aquí para producción, el código ya se compiló en la imagen
+    restart: unless-stopped
+
+volumes:
+  gecos_media:
