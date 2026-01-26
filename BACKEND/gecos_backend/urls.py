@@ -15,13 +15,30 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
 from salones.views import SalonViewSet
 from reservas.views import ReservaViewSet, AsignaturaViewSet
 from usuarios.views import UsuarioViewSet, login_view, logout_view
+
+# Configuración de Swagger/OpenAPI
+schema_view = get_schema_view(
+    openapi.Info(
+        title="GECOS API",
+        default_version='v1',
+        description="API para el Sistema de Gestión y Control de Salones (GECOS)",
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contacto@gecos.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+)
 
 # Router centralizado
 router = DefaultRouter()
@@ -35,6 +52,11 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/login/', login_view, name='login'),
     path('api/logout/', logout_view, name='logout'),
+    
+    # Swagger/OpenAPI URLs
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
 
 # Servir archivos estáticos y media en desarrollo
