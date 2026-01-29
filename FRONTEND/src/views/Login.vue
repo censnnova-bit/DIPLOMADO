@@ -63,10 +63,6 @@
               <span>Docente:</span>
               <code class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">docente1 / Docente123!</code>
             </div>
-            <div class="flex justify-between">
-              <span>Estudiante:</span>
-              <code class="bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded">estudiante1 / Estudiante123!</code>
-            </div>
           </div>
         </div>
       </div>

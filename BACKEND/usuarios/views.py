@@ -8,10 +8,22 @@ from .models import Usuario
 from .serializers import UsuarioSerializer, UsuarioCreateSerializer, LoginSerializer
 
 
+class IsAdmin(IsAuthenticated):
+    """Permiso personalizado para verificar si el usuario es administrador"""
+    def has_permission(self, request, view):
+        return super().has_permission(request, view) and request.user.rol == 'admin'
+
+
 class UsuarioViewSet(viewsets.ModelViewSet):
     """ViewSet para gestionar usuarios"""
     queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
+    
+    def get_permissions(self):
+        """Permisos personalizados según la acción"""
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [IsAdmin()]
+        return [IsAuthenticated()]
     
     def get_serializer_class(self):
         if self.action == 'create':
@@ -23,6 +35,21 @@ class UsuarioViewSet(viewsets.ModelViewSet):
         """Obtener información del usuario actual"""
         serializer = self.get_serializer(request.user)
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['post'], permission_classes=[IsAdmin])
+    def crear_docente(self, request):
+        """Endpoint para que el admin cree usuarios docentes"""
+        data = request.data.copy()
+        data['rol'] = 'docente'  # Forzar rol docente
+        
+        serializer = UsuarioCreateSerializer(data=data)
+        if serializer.is_valid():
+            usuario = serializer.save()
+            return Response(
+                UsuarioSerializer(usuario).data,
+                status=status.HTTP_201_CREATED
+            )
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])

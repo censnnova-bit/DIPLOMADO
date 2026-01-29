@@ -6,6 +6,7 @@ import ClassroomDetail from '../views/ClassroomDetail.vue'
 import AdminSalones from '../views/AdminSalones.vue'
 import AdminReservas from '../views/AdminReservas.vue'
 import AdminAsignaturas from '../views/AdminAsignaturas.vue'
+import AdminUsuarios from '../views/AdminUsuarios.vue'
 import EditReservations from '../views/EditReservations.vue'
 
 const routes = [
@@ -53,6 +54,12 @@ const routes = [
     path: '/admin/asignaturas',
     name: 'AdminAsignaturas',
     component: AdminAsignaturas,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/usuarios',
+    name: 'AdminUsuarios',
+    component: AdminUsuarios,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {

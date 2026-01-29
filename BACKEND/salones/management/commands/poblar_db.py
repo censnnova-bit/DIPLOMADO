@@ -52,23 +52,6 @@ class Command(BaseCommand):
             docente.save()
             self.stdout.write(self.style.SUCCESS(f'✅ Usuario docente1 creado'))
         
-        # Estudiante
-        estudiante, created = Usuario.objects.get_or_create(
-            username='estudiante1',
-            defaults={
-                'email': 'estudiante1@gecos.com',
-                'first_name': 'Ana',
-                'last_name': 'García',
-                'rol': 'estudiante',
-                'documento': '1000000003',
-                'telefono': '3005551234',
-            }
-        )
-        if created:
-            estudiante.set_password('Estudiante123!')
-            estudiante.save()
-            self.stdout.write(self.style.SUCCESS(f'✅ Usuario estudiante1 creado'))
-        
         # Crear salones
         self.stdout.write('Creando salones...')
         
@@ -256,20 +239,6 @@ class Command(BaseCommand):
                     'estado': 'confirmada'
                 }
             )
-            # Reserva 2-4 PM (14:00 - 16:00)
-            Reserva.objects.get_or_create(
-                salon=s1,
-                fecha=today,
-                hora_inicio=datetime.strptime('14:00', '%H:%M').time(),
-                hora_fin=datetime.strptime('16:00', '%H:%M').time(),
-                defaults={
-                    'usuario': estudiante,
-                    'motivo': 'Grupo de estudio',
-                    'descripcion': 'Repaso parcial',
-                    'numero_asistentes': 5,
-                    'estado': 'confirmada'
-                }
-            )
             self.stdout.write(self.style.SUCCESS(f'✅ Reservas creadas para {s1.nombre}'))
             
             # Reserva para el segundo salón
@@ -303,7 +272,4 @@ class Command(BaseCommand):
         self.stdout.write(f'\n2. Docente:')
         self.stdout.write(f'   Usuario: docente1')
         self.stdout.write(f'   Contraseña: Docente123!')
-        self.stdout.write(f'\n3. Estudiante:')
-        self.stdout.write(f'   Usuario: estudiante1')
-        self.stdout.write(f'   Contraseña: Estudiante123!')
         self.stdout.write('\n' + '='*60 + '\n')

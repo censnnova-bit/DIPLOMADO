@@ -20,25 +20,23 @@ python manage.py poblar_db
 ```
 
 Este comando creará:
+
 - ✅ 10 salones con diferentes características
 - ✅ 3 usuarios de prueba con credenciales
 
 ## 🔑 CREDENCIALES DE PRUEBA
 
 ### 1. Administrador
+
 - **Usuario:** `admin`
 - **Contraseña:** `Admin123!`
 - **Rol:** Administrador del sistema
 
-### 2. Docente  
+### 2. Docente
+
 - **Usuario:** `docente1`
 - **Contraseña:** `Docente123!`
 - **Rol:** Docente
-
-### 3. Estudiante
-- **Usuario:** `estudiante1`
-- **Contraseña:** `Estudiante123!`
-- **Rol:** Estudiante
 
 ## Paso 3: Iniciar el Servidor Backend
 
@@ -51,16 +49,19 @@ El backend estará en: http://127.0.0.1:8000/
 ## 📡 ENDPOINTS DISPONIBLES
 
 ### Autenticación
+
 - **POST** `/api/login/` - Iniciar sesión (devuelve token)
 - **POST** `/api/logout/` - Cerrar sesión
 - **GET** `/api/usuarios/me/` - Obtener usuario actual
 
 ### Salones
+
 - **GET** `/api/salones/` - Listar todos los salones
 - **GET** `/api/salones/{id}/` - Detalle de un salón
 - **GET** `/api/salones/disponibles/` - Solo salones disponibles
 
 ### Reservas
+
 - **GET** `/api/reservas/` - Listar reservas
 - **POST** `/api/reservas/` - Crear nueva reserva
 - **GET** `/api/reservas/mis_reservas/` - Reservas del usuario actual
@@ -71,15 +72,15 @@ El backend estará en: http://127.0.0.1:8000/
 
 ```javascript
 // Login
-const response = await fetch('http://127.0.0.1:8000/api/login/', {
-  method: 'POST',
+const response = await fetch("http://127.0.0.1:8000/api/login/", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
-    username: 'admin',
-    password: 'Admin123!'
-  })
+    username: "admin",
+    password: "Admin123!",
+  }),
 });
 
 const data = await response.json();
@@ -87,13 +88,13 @@ const data = await response.json();
 // data.user contiene la información del usuario
 
 // Guardar token en localStorage
-localStorage.setItem('token', data.token);
+localStorage.setItem("token", data.token);
 
 // Usar token en requests posteriores
-const salonesResponse = await fetch('http://127.0.0.1:8000/api/salones/', {
+const salonesResponse = await fetch("http://127.0.0.1:8000/api/salones/", {
   headers: {
-    'Authorization': `Token ${data.token}`
-  }
+    Authorization: `Token ${data.token}`,
+  },
 });
 ```
 
@@ -107,6 +108,7 @@ const salonesResponse = await fetch('http://127.0.0.1:8000/api/salones/', {
 ## 🔧 Próximos Pasos - Frontend
 
 Ahora necesitas:
+
 1. Crear componente de Login en Vue
 2. Implementar store de autenticación (Pinia o Vuex)
 3. Proteger rutas que requieren autenticación

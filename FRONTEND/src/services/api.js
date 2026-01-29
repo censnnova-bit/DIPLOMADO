@@ -109,5 +109,42 @@ export default {
   // Usuarios
   getUsuario() {
     return axios.get(`${API_URL}/usuarios/me/`)
+  },
+
+  getUsuarios(params = {}) {
+    return axios.get(`${API_URL}/usuarios/`, { params })
+  },
+
+  crearDocente(data) {
+    return axios.post(`${API_URL}/usuarios/crear_docente/`, data)
+  },
+
+  actualizarUsuario(id, data) {
+    return axios.patch(`${API_URL}/usuarios/${id}/`, data)
+  },
+
+  eliminarUsuario(id) {
+    return axios.delete(`${API_URL}/usuarios/${id}/`)
+  },
+
+  // Métodos genéricos para peticiones HTTP
+  get(url, config = {}) {
+    return axios.get(`${API_URL}${url}`, config)
+  },
+
+  post(url, data, config = {}) {
+    return axios.post(`${API_URL}${url}`, data, config)
+  },
+
+  put(url, data, config = {}) {
+    return axios.put(`${API_URL}${url}`, data, config)
+  },
+
+  patch(url, data, config = {}) {
+    return axios.patch(`${API_URL}${url}`, data, config)
+  },
+
+  delete(url, config = {}) {
+    return axios.delete(`${API_URL}${url}`, config)
   }
 }

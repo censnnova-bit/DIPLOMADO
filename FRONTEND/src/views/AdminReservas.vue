@@ -235,19 +235,29 @@ const getEstadoClass = (estado) => {
                   {{ reserva.estado }}
                 </span>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div class="flex justify-end gap-2">
+              <td class="px-6 py-4 whitespace-nowrap text-sm">
+                <div class="flex justify-end space-x-2">
                   <button v-if="reserva.estado === 'pendiente'" @click="cambiarEstado(reserva.id, 'confirmada')"
-                    class="text-green-600 hover:text-green-900 dark:text-green-400" title="Aprobar">
-                    ✓
+                    class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 font-medium transition-colors"
+                    title="Aprobar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
                   </button>
                   <button v-if="reserva.estado === 'pendiente'" @click="cambiarEstado(reserva.id, 'cancelada')"
-                    class="text-red-600 hover:text-red-900 dark:text-red-400" title="Rechazar">
-                    ✗
+                    class="text-yellow-600 hover:text-yellow-800 dark:text-yellow-400 dark:hover:text-yellow-300 font-medium transition-colors"
+                    title="Rechazar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                   <button @click="eliminarReserva(reserva.id, reserva.motivo)"
-                    class="text-red-600 hover:text-red-900 dark:text-red-400" title="Eliminar">
-                    🗑
+                    class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium transition-colors"
+                    title="Eliminar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
               </td>

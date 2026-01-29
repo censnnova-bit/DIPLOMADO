@@ -91,6 +91,12 @@ const handleLogout = async () => {
               Gest. Asignaturas
             </router-link>
 
+            <router-link v-if="authStore.isAdmin" to="/admin/usuarios"
+              :class="isActive('/admin/usuarios') ? 'bg-white text-[#B90A0A] shadow-sm font-bold' : 'text-white hover:bg-white/10 font-semibold'"
+              class="px-4 py-2 rounded-lg text-sm transition-all duration-200 transform hover:scale-105">
+              Gest. Usuarios
+            </router-link>
+
             <router-link v-if="!authStore.isAdmin" to="/reservas"
               :class="isActive('/reservas') && !isActive('/reservas/editar') ? 'bg-white text-[#B90A0A] shadow-sm font-bold' : 'text-white hover:bg-white/10 font-semibold'"
               class="px-4 py-2 rounded-lg text-sm transition-all duration-200 transform hover:scale-105">
