@@ -54,7 +54,7 @@ class SalonListSerializer(serializers.ModelSerializer):
         if obj.tiene_aire_acondicionado:
             feats.append({
                 'name': 'Aire Acondicionado', 
-                'icon': 'M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'
+                'icon': 'M12 12c0-3 2.5-6 2.5-6s2.5 3 2.5 6-2.5 6-2.5 6-2.5-3-2.5-6zm0 0c0 3-2.5 6-2.5 6s-2.5-3-2.5-6 2.5-6 2.5-6 2.5 3 2.5 6zm0 0c3 0 6-2.5 6-2.5s-3-2.5-6-2.5-6 2.5-6 2.5 3 2.5 6 2.5zm0 0c-3 0-6 2.5-6 2.5s3 2.5 6 2.5 6-2.5 6-2.5-3-2.5-6-2.5z'
             })
         if obj.tiene_computadores:
              feats.append({

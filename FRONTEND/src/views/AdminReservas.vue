@@ -197,9 +197,6 @@ const getEstadoClass = (estado) => {
                 Motivo</th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                Asistentes</th>
-              <th
-                class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                 Usuario</th>
               <th
                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
@@ -222,9 +219,6 @@ const getEstadoClass = (estado) => {
               </td>
               <td class="px-6 py-4 text-sm text-gray-900 dark:text-white max-w-xs truncate">
                 {{ reserva.motivo }}
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                {{ reserva.numero_asistentes || 'N/A' }}
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                 {{ reserva.usuario_nombre || 'N/A' }}

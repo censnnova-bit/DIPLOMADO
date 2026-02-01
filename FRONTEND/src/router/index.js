@@ -7,6 +7,7 @@ import AdminSalones from '../views/AdminSalones.vue'
 import AdminReservas from '../views/AdminReservas.vue'
 import AdminAsignaturas from '../views/AdminAsignaturas.vue'
 import AdminUsuarios from '../views/AdminUsuarios.vue'
+import AdminMetricas from '../views/AdminMetricas.vue'
 import EditReservations from '../views/EditReservations.vue'
 
 const routes = [
@@ -60,6 +61,12 @@ const routes = [
     path: '/admin/usuarios',
     name: 'AdminUsuarios',
     component: AdminUsuarios,
+    meta: { requiresAuth: true, requiresAdmin: true }
+  },
+  {
+    path: '/admin/metricas',
+    name: 'AdminMetricas',
+    component: AdminMetricas,
     meta: { requiresAuth: true, requiresAdmin: true }
   },
   {

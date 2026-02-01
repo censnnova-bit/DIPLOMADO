@@ -3,12 +3,20 @@ FROM node:18-alpine as build-stage
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Copiar archivos de dependencias primero (mejor caché)
+COPY package.json package-lock.json* ./
 
+# Instalar dependencias (incluyendo chart.js y vue-chartjs)
+RUN npm ci --legacy-peer-deps || npm install
+
+# Copiar el resto del código
 COPY . .
+
+# Variables de entorno para el build
 ARG VITE_API_URL
 ENV VITE_API_URL=$VITE_API_URL
+
+# Construir la aplicación
 RUN npm run build
 
 # Etapa de producción

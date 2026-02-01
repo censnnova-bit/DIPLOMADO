@@ -22,7 +22,7 @@ print('Creando usuarios...')
 admin, created = Usuario.objects.get_or_create(
     username='admin',
     defaults={
-        'email': 'admin@gecos.com',
+        'email': 'admin@fesc.edu.co',
         'first_name': 'Administrador',
         'last_name': 'Sistema',
         'rol': 'admin',
@@ -43,7 +43,7 @@ else:
 docente, created = Usuario.objects.get_or_create(
     username='docente1',
     defaults={
-        'email': 'docente1@gecos.com',
+        'email': 'docente1@fesc.edu.co',
         'first_name': 'Carlos',
         'last_name': 'Martínez',
         'rol': 'docente',
@@ -62,7 +62,7 @@ else:
 docente2, created = Usuario.objects.get_or_create(
     username='docente2',
     defaults={
-        'email': 'docente2@gecos.com',
+        'email': 'docente2@fesc.edu.co',
         'first_name': 'María',
         'last_name': 'González',
         'rol': 'docente',

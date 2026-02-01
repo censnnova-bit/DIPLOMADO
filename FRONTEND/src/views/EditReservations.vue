@@ -205,7 +205,7 @@ const formatDate = (dateStr) => {
                                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-[#B90A0A] focus:ring-[#B90A0A]">
                                     <option value="" disabled>Seleccione una asignatura</option>
                                     <option v-for="asig in (asignaturas || [])" :key="asig.id" :value="asig.nombre">
-                                        {{ asig.nombre }} ({{ asig.codigo }})
+                                        {{ asig.nombre }}
                                     </option>
                                     <!-- Opción fallback por si el motivo actual no está en la lista de asignaturas -->
                                     <option v-if="form.motivo && !asignaturas.some(a => a.nombre === form.motivo)"
